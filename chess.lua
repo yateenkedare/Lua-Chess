@@ -1182,6 +1182,9 @@ function checkmate(piece)
 	os.exit()
 end
 
+--When prompted to input a piece do so in the form of 'R0' or any other code visible on the board then press enter.
+--Coordinates are entered in the form of '24' with 2 corresponding to the row and 4 corresponding to the column.
+--NOTE: can move oppenents pieces during your turn, because the check for this should be in the GUI.
 function main()
 	setUpBoard()
 	over = false
