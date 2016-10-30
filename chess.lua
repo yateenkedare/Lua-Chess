@@ -1230,7 +1230,7 @@ function main()
 					copyBack(e)
 				elseif check("k0") then
 					if not checkmate("k0") then
-						print("Black is in check.")
+						print("White is in check.")
 					end
 				sim = false
 				end
