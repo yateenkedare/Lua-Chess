@@ -44,6 +44,18 @@ function setupBoard()
 	board[7][7] = "r1"
 end
 
+function convertXYToBoardInts(x,y)
+	return math.floor((x-70)/60), math.floor((y-60)/60)
+end
+
+function displayHoverBox(x,y)
+	hoverXd, hoverYd = convertXYToBoardInts(x,y)
+	hoverX = (hoverXd * 60) + 70;
+	hoverY = (hoverYd * 60) + 56;
+
+	string = "x : " .. math.floor((x-70)/60) .. " :: y: " .. math.floor((y-60)/60) .. "  HoverX : " .. hoverX .. "  hoverY : "..hoverY ;
+end
+
 function drawPiece(piece,i,j)
   a = (j*60) + (x/10) + 7;
   b = (i*60) + (y/10)
@@ -66,19 +78,22 @@ function displayPieces()
   for i = 0, 7 do
 		for j = 0, 7 do
 			if board[i][j] ~= "0" then
-        drawPiece(board[i][j],i,j)
+        drawPiece(board[i][j],i,j);
       end
 		end
 	end
 end
 
-
-
 function love.draw()
   love.graphics.draw(chessBoard, 24,9);
-  displayPieces();
-  string = "x : " .. printx .. " :: y: " .. printy;
-  love.graphics.print(string);
+	if hoverXd >= 0 and hoverYd >= 0 and hoverXd <= 7 and hoverYd <= 7  then
+		love.graphics.setColor(0, 255, 0, 80);
+		love.graphics.rectangle( "fill", hoverX, hoverY, 60, 60 ,5);
+		love.graphics.setColor(255, 255, 255);
+	end
+	displayPieces();
+  -- love.graphics.print(string);
+
 end
 
 function love.mousepressed(x1,y1,button)
@@ -86,14 +101,28 @@ function love.mousepressed(x1,y1,button)
     printx = x1;
     printy = y1;
   end
+
+	if checkPressedTimes == 0 then
+		i1,j1 = convertXYToBoardInts(x1,y1);
+		checkPressedTimes = 1;
+	elseif checkPressedTimes == 1 then
+		i2,j2  = convertXYToBoardInts(x1,y1);
+--	send i1,j1(initial cordinates) and i2,j2(destination cordinates) to
+--  chess engine
+--  expected returns Board, string, int(for determining turns)
+		checkPressedTimes = 0;
+	end
+
 end
 
 function love.update(dt)
-
+	q,w = love.mouse.getPosition( )
+	displayHoverBox(q,w)
 end
 
 function love.load()
-  setupBoard();
+	checkPressedTimes = 0;
+	setupBoard();
   printx = 0;
   printy = 0;
   x = love.graphics.getWidth();
