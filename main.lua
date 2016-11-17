@@ -53,6 +53,7 @@ function setUpBoard()
 	k0move = false
 
 	pawns = {}
+	sim = false
 end
 
 function displaySolid(i,j)
@@ -174,7 +175,7 @@ function movePiece(piece, pos)
 			return false
 			--print("That move is invalid, please try again.")
 		end
-		if pieceLoc(piece)[1] == 0 then
+		if pieceLoc(piece)[1] == 0 and sim == false then
 			promote = 1
 			pLoc = pieceLoc(piece)
 			--[[while true do
@@ -243,7 +244,7 @@ function movePiece(piece, pos)
 			return false
 			--print("That move is invalid, please try again.")
 		end
-		if pieceLoc(piece)[1] == 7 then
+		if pieceLoc(piece)[1] == 7 and sim == false then
 			promote = 1
 			pLoc = pieceLoc(piece)
 		end
@@ -565,6 +566,7 @@ function movePiece(piece, pos)
 end
 
 function check(piece)
+	sim = true
 	c = copyBoard()
 	place = pieceLoc(piece)
 	lower = piece:sub(1, 1) == "k"
@@ -573,15 +575,18 @@ function check(piece)
 			if board[i][j] ~= "  " and (string.lower(board[i][j]:sub(1, 1)) == board[i][j]:sub(1, 1)) ~= lower then
 				if movePiece(board[i][j], place) == true then
 					copyBack(c)
+					sim = false
 					return true
 				end
 			end
 		end
 	end
+	sim = false
 	return false
 end
 
 function checkmate(piece)
+	sim = true
 	d = copyBoard()
 	place = pieceLoc(piece)
 	lower = piece:sub(1, 1) == "k"
@@ -593,6 +598,7 @@ function checkmate(piece)
 						if movePiece(board[x][y], {k, l}) == true then
 							if check(piece) == false then
 								copyBack(d)
+								sim = false
 								return false
 							end
 							copyBack(d)
@@ -608,6 +614,7 @@ function checkmate(piece)
 		--print("Checkmate, White wins!")
 	--end
 	--os.exit()
+	sim = true
 	return true
 end
 
@@ -768,6 +775,7 @@ function love.draw()
 			end
 		end
 	elseif turn == 4 then
+		checkPressedTimes = 0
 		if i1 ~= nil and j1 ~= nil then
 			if (i1 == 0 and j1 == 0) or (i1 == 7 and j1 == 0) or (i1 == 0 and j1 == 7) or (i1 == 7 and j1 == 7) then
 				for i = 0, 7 do
@@ -836,6 +844,7 @@ function love.draw()
 			checkPressedTimes = 0
 		end
 	elseif turn == 5 then
+		checkPressedTimes = 0
 		if i1 ~= nil and j1 ~= nil then
 			if (i1 == 0 and j1 == 0) or (i1 == 7 and j1 == 0) or (i1 == 0 and j1 == 7) or (i1 == 7 and j1 == 7) then
 				for i = 0, 7 do
