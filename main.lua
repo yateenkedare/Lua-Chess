@@ -1,4 +1,3 @@
---require "chess"
 
 function setUpBoard()
 	board = {}
@@ -11,20 +10,15 @@ function setUpBoard()
 
 	board[0][0] = "R0"
 	board[0][1] = "H0"
-	--board[0][1] = "  "
 	board[0][2] = "B0"
-	--board[0][2] = "  "
 	board[0][3] = "Q0"
-	--board[0][3] = "  "
 	board[0][4] = "K0"
 	board[0][5] = "B1"
-	--board[0][5] = "  "
 	board[0][6] = "H1"
 	board[0][7] = "R1"
 
 	board[1][0] = "P0"
 	board[1][1] = "P1"
-	--board[1][1] = "  "
 	board[1][2] = "P2"
 	board[1][3] = "P3"
 	board[1][4] = "P4"
@@ -43,14 +37,11 @@ function setUpBoard()
 
 	board[7][0] = "r0"
 	board[7][1] = "h0"
-	--board[7][1] = "  "
 	board[7][2] = "b0"
-	--board[7][2] = "  "
 	board[7][3] = "q0"
 	board[7][4] = "k0"
 	board[7][5] = "b1"
 	board[7][6] = "h1"
-	--board[7][6] = "  "
 	board[7][7] = "r1"
 
 	--Castling variables
@@ -64,19 +55,13 @@ function setUpBoard()
 	pawns = {}
 end
 
-function printBoard()
-	print("\n    00 01 02 03 04 05 06 07")
-	print("   +--+--+--+--+--+--+--+--+")
-	for i = 0, 7 do
-		io.write("0", i, " ")
-		for j = 0, 7 do
-			io.write("|", board[i][j])
-		end
-		print("|")
-		print("   +--+--+--+--+--+--+--+--+")
+function displaySolid(i,j)
+	if i < 8 and j < 8 then
+		solidY = (i * 60) + 56;
+		solidX = (j * 60) + 70;
 	end
-	print()
 end
+
 
 function copyBoard()
 	copy = {}
@@ -97,20 +82,6 @@ function copyBack(copy1)
 	end
 end
 
-function printCopy()
-	print("\n    00 01 02 03 04 05 06 07")
-	print("   +--+--+--+--+--+--+--+--+")
-	for i = 0, 7 do
-		io.write("0", i, " ")
-		for j = 0, 7 do
-			io.write("|", copy[i][j])
-		end
-		print("|")
-		print("   +--+--+--+--+--+--+--+--+")
-	end
-	print()
-end
-
 function pieceLoc(piece)
 	for i = 0, 7 do
 		for j = 0, 7 do
@@ -122,7 +93,6 @@ function pieceLoc(piece)
 end
 
 function occupied(pos, piece)
-	--NOTE: May want to add inBounds check here.
 	if piece == string.lower(piece) then
 		side = "w"
 	else
@@ -147,7 +117,6 @@ function occupied(pos, piece)
 	end
 end
 
---Unused since GUI implementation can't go out of bounds.
 function inBounds(pos)
 	if 0 <= pos[1] and pos[1] <= 7 and 0 <= pos[2]and pos[2] <= 7 then
 		return true
@@ -173,12 +142,12 @@ function castle(piece, square)
 			if board[i][j] ~= "  " and (string.lower(board[i][j]:sub(1, 1)) == board[i][j]:sub(1, 1)) ~= lower then
 				if movePiece(board[i][j], square) == true then
 					copyBack(c)
-					return true
+					return false
 				end
 			end
 		end
 	end
-	return false
+	return true
 end
 
 function movePiece(piece, pos)
@@ -689,6 +658,11 @@ function love.draw()
 		love.graphics.rectangle( "fill", hoverX, hoverY, 60, 60 ,5);
 		love.graphics.setColor(255, 255, 255);
 	end
+	if mousePressedi1 >= 0 and mousePressedj1 >= 0 and mousePressedi1 <= 7 and mousePressedj1 <= 7 and checkPressedTimes == 1 then
+		love.graphics.setColor(0, 255, 0, 80);
+		love.graphics.rectangle( "fill", solidX, solidY, 60, 60 ,5);
+		love.graphics.setColor(255, 255, 255);
+	end
 	displayPieces();
 
 	if turn == 0 then
@@ -707,9 +681,11 @@ function love.draw()
 				success = movePiece(wPiece, {wPos[1], wPos[2]})
 				if not success then
 					state = 2
+					checkPressedTimes = 0
 				else
 					if check("k0") then
 						state = 3
+						checkPressedTimes = 0
 						success = false
 						copyBack(e)
 					elseif promote == 1 then
@@ -748,9 +724,11 @@ function love.draw()
 				success = movePiece(wPiece, {wPos[1], wPos[2]})
 				if not success then
 					state = 2
+					checkPressedTimes = 0
 				else
 					if check("K0") then
 						state = 3
+						checkPressedTimes = 0
 						success = false
 						copyBack(e)
 					elseif promote == 1 then
@@ -939,29 +917,33 @@ function love.draw()
 end
 
 function love.mousepressed(x1,y1,button)
-	if button == 1 then
-		printx = x1;
-		printy = y1;
-	end
-
-	if button == 1 then
-		if checkPressedTimes == 0 then
-			i1,j1 = convertXYToBoardInts(x1,y1);
-			checkPressedTimes = 1;
-		elseif checkPressedTimes == 1 then
-			i2,j2  = convertXYToBoardInts(x1,y1);
-	--	send i1,j1(initial cordinates) and i2,j2(destination cordinates) to
-	--  chess engine
-	--  expected returns Board, string, int(for determining turns)
-			checkPressedTimes = 0;
+	mouseX, mouseY = convertXYToBoardInts(x1+10,y1-10);
+	if inBounds({mouseX, mouseY}) then
+		if button == 1 then
+			if checkPressedTimes == 0 then
+				i1,j1 = mouseX, mouseY;
+				checkPressedTimes = 1;
+				mousePressedi1,mousePressedj1 = mouseY, mouseX
+			elseif checkPressedTimes == 1 then
+				i2,j2  = mouseX, mouseY;
+				checkPressedTimes = 0;
+				mousePressedi1,mousePressedj1 = 9,9
+			end
 		end
 	end
+end
 
+function displaySolid(i,j)
+	if i < 8 and j < 8 then
+		solidY = (i * 60) + 56;
+		solidX = (j * 60) + 70;
+	end
 end
 
 function love.update(dt)
 	q,w = love.mouse.getPosition( )
 	displayHoverBox(q,w)
+	displaySolid(mousePressedi1,mousePressedj1)
 end
 
 function love.load()
@@ -970,6 +952,7 @@ function love.load()
 	setUpBoard();
 	printx = 0;
 	printy = 0;
+	mousePressedi1,mousePressedj1 = 9,9;
 	x = love.graphics.getWidth();
 	y = love.graphics.getHeight();
 	chessBoard = love.graphics.newImage("Chess-Pieces/chessBoard.png");
