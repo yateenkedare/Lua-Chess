@@ -53,7 +53,6 @@ function setUpBoard()
 	k0move = false
 
 	pawns = {}
-	sim = false
 end
 
 function displaySolid(i,j)
@@ -175,7 +174,7 @@ function movePiece(piece, pos)
 			return false
 			--print("That move is invalid, please try again.")
 		end
-		if pieceLoc(piece)[1] == 0 and sim == false then
+		if pieceLoc(piece)[1] == 0 then
 			promote = 1
 			pLoc = pieceLoc(piece)
 			--[[while true do
@@ -244,7 +243,7 @@ function movePiece(piece, pos)
 			return false
 			--print("That move is invalid, please try again.")
 		end
-		if pieceLoc(piece)[1] == 7 and sim == false then
+		if pieceLoc(piece)[1] == 7 then
 			promote = 1
 			pLoc = pieceLoc(piece)
 		end
@@ -566,7 +565,6 @@ function movePiece(piece, pos)
 end
 
 function check(piece)
-	sim = true
 	c = copyBoard()
 	place = pieceLoc(piece)
 	lower = piece:sub(1, 1) == "k"
@@ -575,18 +573,15 @@ function check(piece)
 			if board[i][j] ~= "  " and (string.lower(board[i][j]:sub(1, 1)) == board[i][j]:sub(1, 1)) ~= lower then
 				if movePiece(board[i][j], place) == true then
 					copyBack(c)
-					sim = false
 					return true
 				end
 			end
 		end
 	end
-	sim = false
 	return false
 end
 
 function checkmate(piece)
-	sim = true
 	d = copyBoard()
 	place = pieceLoc(piece)
 	lower = piece:sub(1, 1) == "k"
@@ -598,7 +593,6 @@ function checkmate(piece)
 						if movePiece(board[x][y], {k, l}) == true then
 							if check(piece) == false then
 								copyBack(d)
-								sim = false
 								return false
 							end
 							copyBack(d)
@@ -614,7 +608,6 @@ function checkmate(piece)
 		--print("Checkmate, White wins!")
 	--end
 	--os.exit()
-	sim = true
 	return true
 end
 
@@ -659,6 +652,7 @@ function displayPieces()
 end
 
 function love.draw()
+
 	love.graphics.draw(chessBoard, 24,9);
 	if hoverXd >= 0 and hoverYd >= 0 and hoverXd <= 7 and hoverYd <= 7  then
 		love.graphics.setColor(0, 255, 0, 80);
@@ -672,20 +666,40 @@ function love.draw()
 	end
 	displayPieces();
 
+	_promote_select = nil
+
 	--if a pawn is waiting to get promoted, draw promotion icons
-	if promote == 1 then
-		--if the pawn is white
+	if promote == 1 and (turn == 4 or turn == 5) then
+		--check to see which promotion icon is selected
+		q,w  = love.mouse.getPosition( )
+
+		if q > 620 and q < 680 and w > 250 and w < 310 then
+			_promote_select = 1
+		elseif q > 700 and q < 760 and w > 250 and w < 310 then
+			_promote_select = 2
+		elseif q > 620 and q < 680 and w > 330 and w < 390 then
+			_promote_select = 3
+		elseif q > 700 and q < 760 and w > 330 and w < 390 then
+			_promote_select = 4
+		end
+
+
+		--if the pawn is white (NOT CHECKED since black doesn't stand out against the background
 		--if turn == 4 then
-			love.graphics.draw(whiteRook, 620,250, 0, 2, 1.6);
-			love.graphics.draw(whiteKnight, 700, 250, 0, 2, 1.6);
-			love.graphics.draw(whiteBishop, 620, 330, 0, 2, 1.6);
-			love.graphics.draw(whiteQueen, 700, 330, 0, 2, 1.6);
+
+		--draw promotion icon larger if mouse is over it
+		love.graphics.draw(whiteQueen, 620, 250, 0, _promote_select == 1 and 2.5 or 2, _promote_select == 1 and 2 or 1.6);
+		love.graphics.draw(whiteRook, 700,250, 0, _promote_select == 2 and 2.5 or 2, _promote_select == 2 and 2 or 1.6);
+		love.graphics.draw(whiteKnight, 620, 330, 0, _promote_select == 3 and 2.5 or 2, _promote_select == 3 and 2 or 1.6);
+		love.graphics.draw(whiteBishop, 700, 330, 0, _promote_select == 4 and 2.5 or 2, _promote_select == 4 and 2 or 1.6);
+
 		--[[else
 			love.graphics.draw(blackRook, 620,250, 0, 2, 1.6);
 			love.graphics.draw(blackKnight, 700, 250, 0, 2, 1.6);
 			love.graphics.draw(blackBishop, 620, 330, 0, 2, 1.6);
 			love.graphics.draw(blackQueen, 700, 330, 0, 2, 1.6);
 		end]]
+
 	end
 
 	if turn == 0 then
@@ -774,144 +788,6 @@ function love.draw()
 				checkPressedTimes = 0
 			end
 		end
-	elseif turn == 4 then
-		checkPressedTimes = 0
-		if i1 ~= nil and j1 ~= nil then
-			if (i1 == 0 and j1 == 0) or (i1 == 7 and j1 == 0) or (i1 == 0 and j1 == 7) or (i1 == 7 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "r" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "r" .. count
-				promote = 0
-				turn = 1
-				state = 0
-			elseif (i1 == 1 and j1 == 0) or (i1 == 6 and j1 == 0) or (i1 == 1 and j1 == 7) or (i1 == 6 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "h" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "h" .. count
-				promote = 0
-				turn = 1
-				state = 0
-			elseif (i1 == 2 and j1 == 0) or (i1 == 5 and j1 == 0) or (i1 == 2 and j1 == 7) or (i1 == 5 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "b" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "b" .. count
-				promote = 0
-				turn = 1
-				state = 0
-			elseif (i1 == 3 and j1 == 0) or (i1 == 3 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "q" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "q" .. count
-				promote = 0
-				turn = 1
-				state = 0
-			end
-			if promote == 0 then
-				if check("K0") then
-					if not checkmate("K0") then
-						state = 4
-						turn = 1
-					else
-						state = 0
-						turn = 3
-					end
-				else
-					state = 0
-					turn = 1
-				end
-			end
-			i1, j1, i2, j2 = nil, nil, nil, nil
-			checkPressedTimes = 0
-		end
-	elseif turn == 5 then
-		checkPressedTimes = 0
-		if i1 ~= nil and j1 ~= nil then
-			if (i1 == 0 and j1 == 0) or (i1 == 7 and j1 == 0) or (i1 == 0 and j1 == 7) or (i1 == 7 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "R" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "R" .. count
-				promote = 0
-				turn = 2
-				state = 0
-			elseif (i1 == 1 and j1 == 0) or (i1 == 6 and j1 == 0) or (i1 == 1 and j1 == 7) or (i1 == 6 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "H" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "H" .. count
-				promote = 0
-				turn = 2
-				state = 0
-			elseif (i1 == 2 and j1 == 0) or (i1 == 5 and j1 == 0) or (i1 == 2 and j1 == 7) or (i1 == 5 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "B" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "B" .. count
-				promote = 0
-				turn = 2
-				state = 0
-			elseif (i1 == 3 and j1 == 0) or (i1 == 3 and j1 == 7) then
-				for i = 0, 7 do
-					for j = 0, 7 do
-						if board[i][j]:sub(1, 1) == "Q" then
-							count = count + 1
-						end
-					end
-				end
-				board[pLoc[1]][pLoc[2]] = "Q" .. count
-				promote = 0
-				turn = 2
-				state = 0
-			end
-			if promote == 0 then
-				if check("k0") then
-					if not checkmate("k0") then
-						state = 5
-						turn = 0
-					else
-						state = 0
-						turn = 2
-					end
-				else
-					state = 0
-					turn = 0
-				end
-			end
-			i1, j1, i2, j2 = nil, nil, nil, nil
-			checkPressedTimes = 0
-		end
 	end
 
 	if turn == 0 or turn == 4 then
@@ -954,6 +830,147 @@ function love.mousepressed(x1,y1,button)
 				checkPressedTimes = 0;
 				mousePressedi1,mousePressedj1 = 9,9
 			end
+		end
+	end
+
+	--if pawn promotion is pending, promote to piece currently hovered over
+	count = 0
+
+	if promote == 1 then
+		if turn == 4 then
+			if _promote_select == 1 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "q" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "q" .. count
+					promote = 0
+					turn = 1
+					state = 0
+			elseif _promote_select == 2 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "r" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "r" .. count
+					promote = 0
+					turn = 1
+					state = 0
+			elseif _promote_select == 3 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "h" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "h" .. count
+					promote = 0
+					turn = 1
+					state = 0
+			elseif _promote_select == 4 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "b" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "b" .. count
+					promote = 0
+					turn = 1
+					state = 0
+			end
+			if promote == 0 then
+					if check("K0") then
+						if not checkmate("K0") then
+							state = 4
+							turn = 1
+						else
+							state = 0
+							turn = 3
+						end
+					else
+						state = 0
+						turn = 1
+					end
+			end
+			i1, j1, i2, j2 = nil, nil, nil, nil
+			checkPressedTimes = 0
+
+		elseif turn == 5 then
+			if _promote_select == 1 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "Q" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "Q" .. count
+					promote = 0
+					turn = 0
+					state = 0
+			elseif _promote_select == 2 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "R" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "R" .. count
+					promote = 0
+					turn = 0
+					state = 0
+			elseif _promote_select == 3 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "H" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "H" .. count
+					promote = 0
+					turn = 0
+					state = 0
+			elseif _promote_select == 4 then
+					for i = 0, 7 do
+						for j = 0, 7 do
+							if board[i][j]:sub(1, 1) == "B" then
+								count = count + 1
+							end
+						end
+					end
+					board[pLoc[1]][pLoc[2]] = "B" .. count
+					promote = 0
+					turn = 0
+					state = 0
+			end
+			if promote == 0 then
+					if check("K0") then
+						if not checkmate("k0") then
+							state = 4
+							turn = 0
+						else
+							state = 0
+							turn = 2
+						end
+					else
+						state = 0
+						turn = 0
+					end
+			end
+			i1, j1, i2, j2 = nil, nil, nil, nil
+			checkPressedTimes = 0
+
 		end
 	end
 end
