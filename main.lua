@@ -931,6 +931,7 @@ end
 --[[Callback function that is called once when the game loads. It initializes some
 variables and loads the images used for the game.]]
 function love.load()
+	love.window.setTitle("Chess")
 	turn = 0
 	checkPressedTimes = 0;
 	setUpBoard();
