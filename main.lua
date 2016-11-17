@@ -668,17 +668,17 @@ function love.draw()
 	--if a pawn is waiting to get promoted, draw promotion icons
 	if promote == 1 then
 		--if the pawn is white
-		if turn == 4 then
-			love.graphics.draw(whiteRook, 620,400);
-			love.graphics.draw(whiteKnight, 650, 400);
-			love.graphics.draw(whiteBishop, 620, 440);
-			love.graphics.draw(whiteQueen, 650, 440);
-		else
-			love.graphics.draw(blackRook, 620,400);
-			love.graphics.draw(blackKnight, 650, 400);
-			love.graphics.draw(blackBishop, 620, 440);
-			love.graphics.draw(blackQueen, 650, 440);
-		end
+		--if turn == 4 then
+			love.graphics.draw(whiteRook, 620,250, 0, 2, 1.6);
+			love.graphics.draw(whiteKnight, 700, 250, 0, 2, 1.6);
+			love.graphics.draw(whiteBishop, 620, 330, 0, 2, 1.6);
+			love.graphics.draw(whiteQueen, 700, 330, 0, 2, 1.6);
+		--[[else
+			love.graphics.draw(blackRook, 620,250, 0, 2, 1.6);
+			love.graphics.draw(blackKnight, 700, 250, 0, 2, 1.6);
+			love.graphics.draw(blackBishop, 620, 330, 0, 2, 1.6);
+			love.graphics.draw(blackQueen, 700, 330, 0, 2, 1.6);
+		end]]
 	end
 
 	if turn == 0 then
