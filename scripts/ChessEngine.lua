@@ -14,6 +14,12 @@
 -- The variable turn defines whose turn it is
 -- 0 - BlacksTurn
 -- 1 - WhitesTurn
+
+--strings used more than once
+STR_INVALID_MOVE = "That is not a valid choice,\nplease try again."
+STR_PROMOTE = "What piece would you\nlike to promote\nthis pawn to?"
+STR_SELF_CHECK = "You may not place\nyourself in check,\nplease try again."
+
 local M = {}
 
 function updateMVariables()
@@ -189,7 +195,8 @@ function movePiece(piece, pos)
 		end
 		if pieceLoc(piece)[1] == 0 and sim == false then
 			while true do
-				displayString = "What piece would you like to promote this pawn to?"
+				--promotion string
+				displayString = STR_PROMOTE
 				input = io.read()
 				count = 0
 				if string.lower(input) == "queen" then
@@ -233,7 +240,8 @@ function movePiece(piece, pos)
 					board[pos[1]][pos[2]] = "b" .. count
 					break
 				else
-					displayString = "That is not a valid choice, please try again."
+					--invalid move
+					displayString = STR_INVALID_MOVE
 				end
 			end
 		end
@@ -256,7 +264,8 @@ function movePiece(piece, pos)
 		end
 		if pieceLoc(piece)[1] == 7 and sim == false then
 			while true do
-				displayString = "What piece would you like to promote this pawn to?"
+				--promotion string
+				displayString = STR_PROMOTE
 				input = io.read()
 				count = 0
 				if string.lower(input) == "queen" then
@@ -300,7 +309,8 @@ function movePiece(piece, pos)
 					board[pos[1]][pos[2]] = "B" .. count
 					break
 				else
-					displayString = "That is not a valid choice, please try again."
+					--invalid move
+					displayString = STR_INVALID_MOVE
 				end
 			end
 		end
@@ -673,11 +683,12 @@ local function WhitesTurn()
   e = copyBoard()
   success = movePiece(wPiece, wPos)
   if not success then
-    displayString = "That move is invalid, please try again."
+    displayString = STR_INVALID_MOVE
   else
     sim = true
     if check("k0") then
-      displayString = "You may not place yourself in check, please try again."
+	  --self check string
+      displayString = STR_SELF_CHECK
       success = false
       copyBack(e)
     elseif check("K0") then
@@ -700,11 +711,12 @@ local function BlacksTurn()
   wPiece = _G.wPiece
   success = movePiece(wPiece, wPos)
   if not success then
-    displayString = "That move is invalid, please try again."
+    displayString = STR_INVALID_MOVE
   else
     sim = true
     if check("K0") then
-      displayString = "You may not place yourself in check, please try again."
+	  --self check string
+      displayString = STR_SELF_CHECK
       success = false
       copyBack(e)
     elseif check("k0") then

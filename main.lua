@@ -66,11 +66,11 @@ function love.draw()
 		love.graphics.setColor(255, 255, 255);
 	end
 	displayPieces();
-  love.graphics.print(string, 650, 200);
+  love.graphics.print(string, 620, 200);
 	if turn == 1 then
-		love.graphics.print("White's Turn", 650, 100)
+		love.graphics.print("White's Turn", 620, 100)
 	else
-		love.graphics.print("Black's Turn", 650, 100);
+		love.graphics.print("Black's Turn", 620, 100);
 	end
 end
 
