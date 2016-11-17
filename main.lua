@@ -1,4 +1,5 @@
-
+--[[Function to create a 2D table that holds the state of the chess board.
+It also holds variables for castling and en passant capture.]]
 function setUpBoard()
 	board = {}
 	for i = 0, 7 do
@@ -8,6 +9,7 @@ function setUpBoard()
 		end
 	end
 
+	--ASCII representations of chess pieces
 	board[0][0] = "R0"
 	board[0][1] = "H0"
 	board[0][2] = "B0"
@@ -56,14 +58,9 @@ function setUpBoard()
 	sim = false
 end
 
-function displaySolid(i,j)
-	if i < 8 and j < 8 then
-		solidY = (i * 60) + 56;
-		solidX = (j * 60) + 70;
-	end
-end
 
 
+--Creates a copy of the current game board.
 function copyBoard()
 	copy = {}
 	for i = 0, 7 do
@@ -75,6 +72,7 @@ function copyBoard()
 	return copy
 end
 
+--Replaces the current game board with a stored copy.
 function copyBack(copy1)
 	for i = 0, 7 do
 		for j = 0, 7 do
@@ -83,6 +81,7 @@ function copyBack(copy1)
 	end
 end
 
+--Returns the coordinates of the given piece.
 function pieceLoc(piece)
 	for i = 0, 7 do
 		for j = 0, 7 do
@@ -93,6 +92,8 @@ function pieceLoc(piece)
 	end
 end
 
+--[[Checks whether the given position is occupied. It checks for
+empty spaces as well as ally and enemy pieces.]]
 function occupied(pos, piece)
 	if piece == string.lower(piece) then
 		side = "w"
@@ -118,6 +119,7 @@ function occupied(pos, piece)
 	end
 end
 
+--Function to check if position is in board area.
 function inBounds(pos)
 	if 0 <= pos[1] and pos[1] <= 7 and 0 <= pos[2]and pos[2] <= 7 then
 		return true
@@ -126,6 +128,8 @@ function inBounds(pos)
 	end
 end
 
+--[[Checks whether the given value is in a table.
+Used for cheking if a pawn has moved or not.]]
 function inTable(table, e)
 	for _, val in pairs(table) do
 		if val == e then
@@ -135,6 +139,8 @@ function inTable(table, e)
 	return false
 end
 
+--[[A helper function for castling. Checks whether the space the king
+moves through is under attack.]]
 function castle(piece, square)
 	c = copyBoard()
 	lower = piece:sub(1, 1) == "k"
@@ -151,11 +157,13 @@ function castle(piece, square)
 	return true
 end
 
+--[[The function responsible for checking for valid moves and moving the pieces.
+All pieces and their special moves (except promotion) are handled within this function.]]
 function movePiece(piece, pos)
 	local loc = pieceLoc(piece)
 	count = 0
 	empty = true
-	--NOTE: Add logic for not being able to move on same spot.
+	--Logic for moving white pawns.
 	if piece:sub(1, 1) == "p" then
 		if loc[1] == 6 and pos[1] == loc[1] - 2 and loc[2] == pos[2] and occupied(pos, piece) == "n" and occupied({pos[1] + 1, pos[2]}, piece) == "n"then
 			board[loc[1]][loc[2]] = "  "
@@ -173,60 +181,12 @@ function movePiece(piece, pos)
 			board[pos[1] + 1][pos[2]] = "  "
 		else
 			return false
-			--print("That move is invalid, please try again.")
 		end
 		if pieceLoc(piece)[1] == 0 and sim == false then
 			promote = 1
 			pLoc = pieceLoc(piece)
-			--[[while true do
-				print("What piece would you like to promote this pawn to?")
-				input = io.read()
-				count = 0
-				if string.lower(input) == "queen" then
-					for i = 0, 7 do
-						for j = 0, 7 do
-							if board[i][j]:sub(1, 1) == "q" then
-								count = count + 1
-							end
-						end
-					end
-					board[pos[1]]--[pos[2]] = "q" .. count
-					--[[break
-				elseif string.lower(input) == "rook" then
-					for i = 0, 7 do
-						for j = 0, 7 do
-							if board[i][j]:sub(1, 1) == "r" then
-								count = count + 1
-							end
-						end
-					end
-					board[pos[1]]--[pos[2]] = "r" .. count
-					--[[break
-				elseif string.lower(input) == "knight" then
-					for i = 0, 7 do
-						for j = 0, 7 do
-							if board[i][j]:sub(1, 1) == "h" then
-								count = count + 1
-							end
-						end
-					end
-					board[pos[1]]--[pos[2]] = "h" .. count
-					--[[break
-				elseif string.lower(input) == "bishop" then
-					for i = 0, 7 do
-						for j = 0, 7 do
-							if board[i][j]:sub(1, 1) == "b" then
-								count = count + 1
-							end
-						end
-					end
-					board[pos[1]]--[pos[2]] = "b" .. count
-					--[[break
-				else
-					print("That is not a valid choice, please try again.")
-				end
-			end]]
 		end
+	--Logic for moving black pawns.
 	elseif piece:sub(1, 1) == "P" then
 		if loc[1] == 1 and pos[1] == loc[1] + 2 and loc[2] == pos[2] and occupied(pos, piece) == "n" and occupied({pos[1] - 1, pos[2]}, piece) == "n" then
 			board[loc[1]][loc[2]] = "  "
@@ -242,12 +202,12 @@ function movePiece(piece, pos)
 			board[pos[1] - 1][pos[2]] = "  "
 		else
 			return false
-			--print("That move is invalid, please try again.")
 		end
 		if pieceLoc(piece)[1] == 7 and sim == false then
 			promote = 1
 			pLoc = pieceLoc(piece)
 		end
+	--Logic for moving rooks.
 	elseif string.lower(piece:sub(1, 1)) == "r" then
 		if pos[1] == loc[1] and pos[2] > loc[2] and occupied(pos, piece) ~= "a" then
 			while loc[2] + count + 1 < pos[2] do
@@ -350,8 +310,8 @@ function movePiece(piece, pos)
 		end
 		if empty == false then
 			return false
-			--print("That move is invalid, please try again.")
 		end
+	--Logic for moving knights.
 	elseif string.lower(piece:sub(1, 1)) == "h" then
 		if ((pos[1] == loc[1] + 2 or pos[1] == loc[1] - 2) and (pos[2] == loc[2] - 1 or pos[2] == loc[2] + 1) and occupied(pos, piece) ~= "a") or
 		((pos[1] == loc[1] + 1 or pos[1] == loc[1] - 1) and (pos[2] == loc[2] - 2 or pos[2] == loc[2] + 2) and occupied(pos, piece) ~= "a") then
@@ -359,9 +319,9 @@ function movePiece(piece, pos)
 			board[pos[1]][pos[2]] = piece
 		else
 			return false
-			--print("That move is invalid, please try again.")
 		end
 	end
+	--Logic for moving bishops.
 	if string.lower(piece:sub(1, 1)) == "b" then
 		if loc[1] - pos[1] == loc[2] - pos[2] and loc[1] - pos[1] > 0 and loc[2] - pos[2] > 0 and occupied(pos, piece) ~= "a" then
 			while loc[2] - count - 1 > pos[2] do
@@ -412,8 +372,8 @@ function movePiece(piece, pos)
 		end
 		if empty == false then
 			return false
-			--print("That move is invalid, please try again.")
 		end
+	--Logic for moving queens.
 	elseif string.lower(piece:sub(1, 1)) == "q" then
 		if pos[1] == loc[1] and pos[2] > loc[2] and occupied(pos, piece) ~= "a" then
 			while loc[2] + count + 1 < pos[2] do
@@ -508,8 +468,8 @@ function movePiece(piece, pos)
 		end
 		if empty == false then
 			return false
-			--print("That move is invalid, please try again.")
 		end
+	--Logic for moving black king.
 	elseif piece:sub(1, 1) == "K" then
 		if (pos[1] == loc[1] - 1 or pos[1] == loc[1] + 1 or pos[1] == loc[1]) and (pos[2] == loc[2] - 1 or pos[2] == loc[2] + 1 or pos[2] == loc[2]) and occupied(pos, piece) ~= "a" then
 			board[loc[1]][loc[2]] = "  "
@@ -531,8 +491,8 @@ function movePiece(piece, pos)
 			R1move = true
 		else
 			return false
-			--print("That move is invalid, please try again.")
 		end
+	--Logic for moving white king.
 	elseif piece:sub(1, 1) == "k" then
 		if (pos[1] == loc[1] - 1 or pos[1] == loc[1] + 1 or pos[1] == loc[1]) and (pos[2] == loc[2] - 1 or pos[2] == loc[2] + 1 or pos[2] == loc[2]) and occupied(pos, piece) ~= "a" then
 			board[loc[1]][loc[2]] = "  "
@@ -554,10 +514,9 @@ function movePiece(piece, pos)
 			r1move = true
 		else
 			return false
-			--print("That move is invalid, please try again.")
 		end
 	end
-	--pawns = {}
+	--Logic for checking pawn initial movement.
 	if insert == true then
 		table.insert(pawns, piece)
 		insert = false
@@ -565,6 +524,7 @@ function movePiece(piece, pos)
 	return true
 end
 
+--Function to check if a player is in check.
 function check(piece)
 	sim = true
 	c = copyBoard()
@@ -585,6 +545,7 @@ function check(piece)
 	return false
 end
 
+--Function to check if a player is in checkmate.
 function checkmate(piece)
 	sim = true
 	d = copyBoard()
@@ -608,20 +569,16 @@ function checkmate(piece)
 			end
 		end
 	end
-	--if lower then
-		--print("Checkmate, Black wins!")
-	--else
-		--print("Checkmate, White wins!")
-	--end
-	--os.exit()
 	sim = true
 	return true
 end
 
+--Converts mouse coordinates to board coordinates.
 function convertXYToBoardInts(x,y)
 	return math.floor((x-70)/60), math.floor((y-60)/60)
 end
 
+--Function to display semi-transparent square above mouseovered piece.
 function displayHoverBox(x,y)
 	hoverXd, hoverYd = convertXYToBoardInts(x,y)
 	hoverX = (hoverXd * 60) + 70;
@@ -630,6 +587,7 @@ function displayHoverBox(x,y)
 	string = "x : " .. math.floor((x-70)/60) .. " :: y: " .. math.floor((y-60)/60) .. "  HoverX : " .. hoverX .. "  hoverY : "..hoverY ;
 end
 
+--Matches each ASCII piece to its pictoral representation.
 function drawPiece(piece,i,j)
   a = (j*60) + (x/10) + 7;
   b = (i*60) + (y/10)
@@ -648,6 +606,7 @@ function drawPiece(piece,i,j)
   end
 end
 
+--Iterates through all spaces and calls the draw function for each piece.
 function displayPieces()
   for i = 0, 7 do
 		for j = 0, 7 do
@@ -658,7 +617,11 @@ function displayPieces()
 	end
 end
 
+--[[A callback function provided by the Love game engine that is called continuously to draw the game.
+It draws everything as well as contains the main game loop which switches players, displays instructions,
+and controls the overall flow of the game.]]
 function love.draw()
+	--Code that draws the mouseover square and calles the funcion to draw the pieces.
 	love.graphics.draw(chessBoard, 24,9);
 	if hoverXd >= 0 and hoverYd >= 0 and hoverXd <= 7 and hoverYd <= 7  then
 		love.graphics.setColor(0, 255, 0, 80);
@@ -672,6 +635,7 @@ function love.draw()
 	end
 	displayPieces();
 
+	--logic for White player.
 	if turn == 0 then
 		if i1 ~= nil and j1 ~= nil then
 			if board[j1][i1] == "  " then
@@ -715,6 +679,7 @@ function love.draw()
 				checkPressedTimes = 0
 			end
 		end
+	--Logic for Black player.
 	elseif turn == 1 then
 		if i1 ~= nil and j1 ~= nil then
 			if board[j1][i1] == "  " then
@@ -758,6 +723,7 @@ function love.draw()
 				checkPressedTimes = 0
 			end
 		end
+	--Logic for promoting White pawns.
 	elseif turn == 4 then
 		checkPressedTimes = 0
 		if i1 ~= nil and j1 ~= nil then
@@ -827,6 +793,7 @@ function love.draw()
 			i1, j1, i2, j2 = nil, nil, nil, nil
 			checkPressedTimes = 0
 		end
+	--Logic for promoting Black pawns.
 	elseif turn == 5 then
 		checkPressedTimes = 0
 		if i1 ~= nil and j1 ~= nil then
@@ -898,6 +865,7 @@ function love.draw()
 		end
 	end
 
+	--Control block for printing messages.
 	if turn == 0 or turn == 4 then
 		love.graphics.print("White's turn.", 600, 100);
 	elseif turn == 1 then
@@ -925,6 +893,8 @@ function love.draw()
 
 end
 
+--[[Function to get the coordinates of mouse presses. Recordes two clicks, one
+for piece selection and one for move selection]]
 function love.mousepressed(x1,y1,button)
 	mouseX, mouseY = convertXYToBoardInts(x1+10,y1-10);
 	if inBounds({mouseX, mouseY}) then
@@ -942,6 +912,7 @@ function love.mousepressed(x1,y1,button)
 	end
 end
 
+--Creates square for piece selection.
 function displaySolid(i,j)
 	if i < 8 and j < 8 then
 		solidY = (i * 60) + 56;
@@ -949,12 +920,16 @@ function displaySolid(i,j)
 	end
 end
 
+--[[Callback function that is called continuously. It is used to constantly get mouse position
+and update mouseover box.]]
 function love.update(dt)
 	q,w = love.mouse.getPosition( )
 	displayHoverBox(q,w)
 	displaySolid(mousePressedi1,mousePressedj1)
 end
 
+--[[Callback function that is called once when the game loads. It initializes some
+variables and loads the images used for the game.]]
 function love.load()
 	turn = 0
 	checkPressedTimes = 0;
