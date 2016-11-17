@@ -55,6 +55,7 @@ function setUpBoard()
 	k0move = false
 
 	pawns = {}
+	sim = false
 end
 
 
@@ -181,7 +182,7 @@ function movePiece(piece, pos)
 		else
 			return false
 		end
-		if pieceLoc(piece)[1] == 0 then
+		if pieceLoc(piece)[1] == 0 and sim == false then
 			promote = 1
 			pLoc = pieceLoc(piece)
 		end
@@ -202,7 +203,7 @@ function movePiece(piece, pos)
 		else
 			return false
 		end
-		if pieceLoc(piece)[1] == 7 then
+		if pieceLoc(piece)[1] == 7 and sim == false then
 			promote = 1
 			pLoc = pieceLoc(piece)
 		end
@@ -525,6 +526,7 @@ end
 
 --Function to check if a player is in check.
 function check(piece)
+	sim = true
 	c = copyBoard()
 	place = pieceLoc(piece)
 	lower = piece:sub(1, 1) == "k"
@@ -533,16 +535,19 @@ function check(piece)
 			if board[i][j] ~= "  " and (string.lower(board[i][j]:sub(1, 1)) == board[i][j]:sub(1, 1)) ~= lower then
 				if movePiece(board[i][j], place) == true then
 					copyBack(c)
+					sim = false
 					return true
 				end
 			end
 		end
 	end
+	sim = false
 	return false
 end
 
 --Function to check if a player is in checkmate.
 function checkmate(piece)
+	sim = true
 	d = copyBoard()
 	place = pieceLoc(piece)
 	lower = piece:sub(1, 1) == "k"
@@ -554,6 +559,7 @@ function checkmate(piece)
 						if movePiece(board[x][y], {k, l}) == true then
 							if check(piece) == false then
 								copyBack(d)
+								sim = false
 								return false
 							end
 							copyBack(d)
@@ -563,6 +569,7 @@ function checkmate(piece)
 			end
 		end
 	end
+	sim = true
 	return true
 end
 
@@ -921,7 +928,7 @@ function love.mousepressed(x1,y1,button)
 			if promote == 0 then
 					if check("K0") then
 						if not checkmate("k0") then
-							state = 4
+							state = 5
 							turn = 0
 						else
 							state = 0
