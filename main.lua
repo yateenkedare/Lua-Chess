@@ -160,9 +160,11 @@ end
 --[[The function responsible for checking for valid moves and moving the pieces.
 All pieces and their special moves (except promotion) are handled within this function.]]
 function movePiece(piece, pos)
+	--initialize vars local to function
 	local loc = pieceLoc(piece)
 	count = 0
 	empty = true
+	insert = false
 	--Logic for moving white pawns.
 	if piece:sub(1, 1) == "p" then
 		if loc[1] == 6 and pos[1] == loc[1] - 2 and loc[2] == pos[2] and occupied(pos, piece) == "n" and occupied({pos[1] + 1, pos[2]}, piece) == "n"then
@@ -516,10 +518,14 @@ function movePiece(piece, pos)
 			return false
 		end
 	end
+
 	--Logic for checking pawn initial movement.
 	if insert == true then
 		table.insert(pawns, piece)
 		insert = false
+	--if a pawn has NOT just made their initial move, there should be nothing in the pawn table
+	else
+		pawns = {}
 	end
 	return true
 end
