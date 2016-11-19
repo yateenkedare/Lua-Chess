@@ -1,5 +1,7 @@
 --[[Function to create a 2D table that holds the state of the chess board.
 It also holds variables for castling and en passant capture.]]
+
+--also used when restarting the game
 function setUpBoard()
 	board = {}
 	for i = 0, 7 do
@@ -54,8 +56,17 @@ function setUpBoard()
 	r1move = false
 	k0move = false
 
+	--init vars
 	pawns = {}
 	sim = false
+	turn = 0
+	promote = 0
+	k0move = false
+	K0move = false
+	r0move = false
+	R0move = false
+	r1move = false
+	R1move = false
 end
 
 
@@ -659,7 +670,7 @@ function love.draw()
 		end
 
 
-		--if the pawn is white (NOT CHECKED since black doesn't stand out against the background
+		--if the pawn is white (NOT CHECKED since black doesn't stand out against the background)
 		--if turn == 4 then
 
 		--draw promotion icon larger if mouse is over it
@@ -786,11 +797,29 @@ function love.draw()
 	elseif state == 5 then
 		love.graphics.print("White is in check.", 600, 120);
 	elseif state == 6 then
-		love.graphics.print("Choose a piece. Click", 600, 120);
-		love.graphics.print("starting position of", 600, 140);
-		love.graphics.print("piece to be promoted.", 600, 160);
+		love.graphics.print("PROMOTION!\nClick a piece type\nbelow to promote.", 600, 120);
 	end
 
+	--always print hotkey reference
+	love.graphics.print("Press Esc to exit.\nPress R to restart.", 600, 40)
+
+end
+
+--handle hotkey presses
+function love.keypressed(key, scancode, isrepeat)
+	--only bother on single press
+	if isrepeat then
+		return
+	end
+
+	--otherwise, do something based on hotkey
+	if key == "escape" then
+		love.event.quit()
+	end
+
+	if key == "r" then
+		setUpBoard()
+	end
 end
 
 function love.mousepressed(x1,y1,button)
